@@ -1,4 +1,4 @@
-import types from '../constants/action-types';
+import types, { PlayerStatusUpdatedPayload } from '../constants/action-types';
 import { config } from '../lib/app';
 import { shuffleTracks } from '../utils/utils-player';
 import { TrackModel, Action, Repeat, PlayerStatus } from '../../shared/types/interfaces';
@@ -36,18 +36,12 @@ export default (state = initialState, action: Action): PlayerState => {
       };
     }
 
-    case types.PLAYER_PLAY: {
+    case types.PLAYER_STATUS_UPDATED: {
+      const { playerStatus } = action.payload as PlayerStatusUpdatedPayload;
       return {
         ...state,
-        playerStatus: PlayerStatus.PLAY
-      };
-    }
-
-    case types.PLAYER_PAUSE: {
-      return {
-        ...state,
-        playerStatus: PlayerStatus.PAUSE
-      };
+        playerStatus
+      }
     }
 
     case types.PLAYER_STOP: {

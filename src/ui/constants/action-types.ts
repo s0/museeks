@@ -1,3 +1,5 @@
+import { PlayerStatus } from '../../shared/types/interfaces';
+
 enum ActionTypes {
   LIBRARY_REFRESH = 'LIBRARY_REFRESH',
   REFRESH_CONFIG = 'REFRESH_CONFIG',
@@ -5,9 +7,7 @@ enum ActionTypes {
   FILTER_SEARCH = 'FILTER_SEARCH',
 
   PLAYER_START = 'PLAYER_START',
-  PLAYER_TOGGLE = 'PLAYER_TOGGLE',
-  PLAYER_PLAY = 'PLAYER_PLAY',
-  PLAYER_PAUSE = 'PLAYER_PAUSE',
+  PLAYER_STATUS_UPDATED = 'PLAYER_STATUS_UPDATED',
   PLAYER_STOP = 'PLAYER_STOP',
   PLAYER_NEXT = 'PLAYER_NEXT',
   PLAYER_PREVIOUS = 'PLAYER_PREVIOUS',
@@ -39,6 +39,10 @@ enum ActionTypes {
   TOAST_REMOVE = 'TOAST_REMOVE',
 
   NOTIFICATION_NEW = 'NOTIFICATION_NEW'
+}
+
+export interface PlayerStatusUpdatedPayload {
+  playerStatus: PlayerStatus;
 }
 
 export default ActionTypes;

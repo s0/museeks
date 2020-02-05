@@ -27,9 +27,6 @@ const AUDIO_ERRORS = {
  */
 export const play = async () => {
   await Player.play();
-  store.dispatch({
-    type: types.PLAYER_PLAY
-  });
 };
 
 /**
@@ -37,9 +34,6 @@ export const play = async () => {
  */
 export const pause = () => {
   Player.pause();
-  store.dispatch({
-    type: types.PLAYER_PAUSE
-  });
 };
 
 /**

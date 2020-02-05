@@ -2,7 +2,9 @@ import { ControllerEndpoint } from '@synesthesia-project/core/lib/protocols/cont
 import { DEFAULT_SYNESTHESIA_PORT } from '@synesthesia-project/core/lib/constants';
 
 import * as app from './app';
-import { Track } from '../../shared/types/interfaces';
+import store from '../store';
+import types, { PlayerStatusUpdatedPayload } from '../constants/action-types';
+import { Track, PlayerStatus } from '../../shared/types/interfaces';
 import * as utils from '../utils/utils';
 
 interface PlayerOptions {
@@ -48,10 +50,10 @@ class Player {
     this.durationThresholdReached = false;
 
     // Initialize Synesthesia
-    this.updateSynesthesiaState = this.updateSynesthesiaState.bind(this);
-    this.audio.addEventListener('playing', this.updateSynesthesiaState);
-    this.audio.addEventListener('pause', this.updateSynesthesiaState);
-    this.audio.addEventListener('seeked', this.updateSynesthesiaState);
+    this.updateState = this.updateState.bind(this);
+    this.audio.addEventListener('playing', this.updateState);
+    this.audio.addEventListener('pause', this.updateState);
+    this.audio.addEventListener('seeked', this.updateState);
   }
 
   private getSynesthesiaEndpoint() {
@@ -103,11 +105,19 @@ class Player {
           }
         });
       }
-
     return this.synesthesiaEndpoint;
   }
 
-  private updateSynesthesiaState() {
+  private updateState() {
+    // Push to redux
+    const payload: PlayerStatusUpdatedPayload = {
+      playerStatus: this.audio.paused ? PlayerStatus.PAUSE : PlayerStatus.PLAY
+    };
+    store.dispatch({
+      type: types.PLAYER_STATUS_UPDATED,
+      payload
+    })
+    // If we are using synesthesia, send updated state
     this.getSynesthesiaEndpoint().then(endpoint => {
       if (!this.audioMeta || !this.audio) return;
       endpoint.sendState({

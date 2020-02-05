@@ -2,6 +2,8 @@ import { ControllerEndpoint } from '@synesthesia-project/core/lib/protocols/cont
 import { DEFAULT_SYNESTHESIA_PORT } from '@synesthesia-project/core/lib/constants';
 
 import * as app from './app';
+import { Track } from '../../shared/types/interfaces';
+import * as utils from '../utils/utils';
 
 interface PlayerOptions {
   playbackRate?: number;
@@ -10,8 +12,15 @@ interface PlayerOptions {
   muted?: boolean;
 }
 
+interface SynesthesiaMeta {
+  title: string;
+  artist?: string;
+  album?: string;
+}
+
 class Player {
   private audio: HTMLAudioElement;
+  private audioMeta: SynesthesiaMeta | null = null;
   private durationThresholdReached: boolean;
   public threshold: number;
   private synesthesiaEndpoint: Promise<ControllerEndpoint> | null = null;
@@ -100,15 +109,14 @@ class Player {
 
   private updateSynesthesiaState() {
     this.getSynesthesiaEndpoint().then(endpoint => {
-      if (/*!this.meta ||*/ !this.audio) return;
+      if (!this.audioMeta || !this.audio) return;
       endpoint.sendState({
         layers: [{
-          // TODO: optionally send file path instead of meta
           file: {
             type: 'meta' as 'meta',
-            title: 'dummy',//this.meta.title,
-            artist: 'dummy',//this.meta.artist,
-            album: 'dummy',//this.meta.album,
+            title: this.audioMeta.title,
+            artist: this.audioMeta.artist,
+            album: this.audioMeta.album,
             lengthMillis: this.audio.duration * 1000
           },
           state: this.audio.paused ? {
@@ -176,10 +184,15 @@ class Player {
     await this.audio.setSinkId(deviceId);
   }
 
-  setAudioSrc(src: string) {
+  setAudioTrack(track: Track) {
     // When we change song, need to update the thresholdReached indicator.
     this.durationThresholdReached = false;
-    this.audio.src = src;
+    this.audioMeta = {
+      title: track.title,
+      artist: track.artist.join(', '),
+      album: track.album
+    }
+    this.audio.src = utils.parseUri(track.path);
   }
 
   setAudioCurrentTime(currentTime: number) {

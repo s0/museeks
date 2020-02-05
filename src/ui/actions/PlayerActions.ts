@@ -7,7 +7,6 @@ import types from '../constants/action-types';
 import SORT_ORDERS from '../constants/sort-orders';
 
 import * as app from '../lib/app';
-import * as utils from '../utils/utils';
 import Player from '../lib/player';
 import { sortTracks, filterTracks } from '../utils/utils-library';
 import { shuffleTracks } from '../utils/utils-player';
@@ -83,9 +82,7 @@ export const start = async (queue?: TrackModel[], _id?: string) => {
 
   // If a track exists
   if (queuePosition > -1) {
-    const uri = utils.parseUri(newQueue[queuePosition].path);
-
-    Player.setAudioSrc(uri);
+    Player.setAudioTrack(newQueue[queuePosition]);
     await Player.play();
 
     let queueCursor = queuePosition; // Clean that variable mess later
@@ -160,9 +157,8 @@ export const next = async () => {
 
     // tslint:disable-next-line strict-type-predicates
     if (track !== undefined) {
-      const uri = utils.parseUri(track.path);
 
-      Player.setAudioSrc(uri);
+      Player.setAudioTrack(track);
       await Player.play();
       store.dispatch({
         type: types.PLAYER_NEXT,
@@ -198,9 +194,7 @@ export const previous = async () => {
 
     // tslint:disable-next-line
     if (newTrack !== undefined) {
-      const uri = utils.parseUri(newTrack.path);
-
-      Player.setAudioSrc(uri);
+      Player.setAudioTrack(newTrack);
       await Player.play();
 
       store.dispatch({

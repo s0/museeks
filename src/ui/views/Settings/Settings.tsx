@@ -6,6 +6,7 @@ import { Config } from '../../../shared/types/interfaces';
 import * as Nav from '../../elements/Nav/Nav';
 import { config } from '../../lib/app';
 import { LibraryState } from '../../reducers/library';
+import { PlayerState } from '../../reducers/player';
 import { RootState } from '../../reducers';
 import * as appStyles from '../../App.css';
 import SettingsLibrary from './SettingsLibrary';
@@ -18,10 +19,11 @@ import * as styles from './Settings.css';
 
 interface Props {
   library: LibraryState;
+  player: PlayerState;
 }
 
 const Settings: React.FC<Props> = (props) => {
-  const { library } = props;
+  const { library, player } = props;
   const conf = config.get() as Config;
 
   return (
@@ -42,7 +44,7 @@ const Settings: React.FC<Props> = (props) => {
           <Route path='/settings/library' render={(p) => <SettingsLibrary {...p} library={library} />} />
           <Route path='/settings/interface' render={(p) => <SettingsUI {...p} config={conf} />} />
           <Route path='/settings/audio' render={(p) => <SettingsAudio {...p} config={conf} />} />
-          <Route path='/settings/synesthesia' render={(p) => <SettingsSynesthesia {...p} config={conf} />} />
+          <Route path='/settings/synesthesia' render={(p) => <SettingsSynesthesia {...p} config={conf} player={player} />} />
           <Route path='/settings/about' render={() => <SettingsAbout />} />
         </Switch>
       </div>
@@ -51,7 +53,8 @@ const Settings: React.FC<Props> = (props) => {
 };
 
 const mapStateToProps = (state: RootState) => ({
-  library: state.library
+  library: state.library,
+  player: state.player,
 });
 
 export default connect(mapStateToProps)(Settings);

@@ -3,6 +3,7 @@ import { DEFAULT_SYNESTHESIA_PORT } from '@synesthesia-project/core/lib/constant
 
 import * as app from './app';
 import store from '../store';
+import { SynesthesiaStatus } from '../reducers/player';
 import types, { PlayerStatusUpdatedPayload } from '../constants/action-types';
 import { Track, PlayerStatus } from '../../shared/types/interfaces';
 import * as utils from '../utils/utils';
@@ -18,6 +19,17 @@ interface SynesthesiaMeta {
   title: string;
   artist?: string;
   album?: string;
+}
+
+/**
+ * Update the status of the connection,
+ * which is used in the UI for the settings page
+ */
+function updateSynesthesiaStatus(payload: SynesthesiaStatus) {
+  store.dispatch({
+    type: types.PLAYER_SYNESTHESIA_CONNECTION_UPDATED,
+    payload
+  })
 }
 
 class Player {
@@ -76,6 +88,7 @@ class Player {
           const ws = new WebSocket(`ws://localhost:${synesthesiaPort}/control`);
           const endpoint = new ControllerEndpoint(msg => ws.send(JSON.stringify(msg)));
           ws.addEventListener('open', () => {
+            updateSynesthesiaStatus({status: 'connected'});
             endpoint.setRequestHandler(async req => {
               if (!this.audio) return { success: false };
               switch (req.request) {
@@ -95,14 +108,21 @@ class Player {
             });
             resolve({endpoint, ws});
           });
-          ws.addEventListener('error', err => {
-            if (endpointPromise === this.synesthesiaEndpoint)
+          ws.addEventListener('error', e => {
+            if (endpointPromise === this.synesthesiaEndpoint) {
               this.synesthesiaEndpoint = null;
-            reject(err);
+              updateSynesthesiaStatus({
+                status: 'error',
+                error: `Unable to connect to ${(e.currentTarget as any).url}`
+              });
+            }
+            reject(e);
           });
           ws.addEventListener('close', _ => {
-            if (endpointPromise === this.synesthesiaEndpoint)
+            if (endpointPromise === this.synesthesiaEndpoint) {
               this.synesthesiaEndpoint = null;
+              updateSynesthesiaStatus(null);
+            }
           });
           ws.addEventListener('message', msg => {
             endpoint.recvMessage(JSON.parse(msg.data));
@@ -114,6 +134,10 @@ class Player {
           if (this.synesthesiaEndpoint === endpointPromise) {
             // Remove the endpoint so an attempt will be tried again
             this.synesthesiaEndpoint = null;
+            updateSynesthesiaStatus({
+              status: 'error',
+              error: err.toString()
+            });
           }
         });
       }

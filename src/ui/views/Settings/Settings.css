@@ -15,3 +15,19 @@
   width: 400px;
   max-width: calc(100% - 170px);
 }
+
+.settings__status {
+  background: #fff;
+  padding: 8px 12px;
+  color: #777;
+  border: solid 1px var(--border-color);
+  border-radius: var(--border-radius);
+}
+
+.settings__status__error {
+  color: #900;
+}
+
+.settings__status__good {
+  color: #090;
+}

@@ -3,6 +3,11 @@ import { config } from '../lib/app';
 import { shuffleTracks } from '../utils/utils-player';
 import { TrackModel, Action, Repeat, PlayerStatus } from '../../shared/types/interfaces';
 
+export type SynesthesiaStatus =
+  null |
+  { status: 'connected'; } |
+  { status: 'error'; error: string; };
+
 export interface PlayerState {
   queue: TrackModel[];
   oldQueue: TrackModel[];
@@ -10,6 +15,7 @@ export interface PlayerState {
   repeat: Repeat;
   shuffle: boolean;
   playerStatus: PlayerStatus;
+  synesthesiaStatus: SynesthesiaStatus; 
 }
 
 const initialState: PlayerState = {
@@ -18,7 +24,8 @@ const initialState: PlayerState = {
   queueCursor: null, // The cursor of the queue
   repeat: config.get('audioRepeat'), // the current repeat state (one, all, none)
   shuffle: config.get('audioShuffle'), // If shuffle mode is enabled
-  playerStatus: PlayerStatus.STOP // Player status
+  playerStatus: PlayerStatus.STOP, // Player status,
+  synesthesiaStatus: null,
 };
 
 export default (state = initialState, action: Action): PlayerState => {
@@ -184,6 +191,13 @@ export default (state = initialState, action: Action): PlayerState => {
         ...state,
         queue: action.payload.tracks
       };
+    }
+
+    case types.PLAYER_SYNESTHESIA_CONNECTION_UPDATED: {
+      return {
+        ...state,
+        synesthesiaStatus: action.payload
+      }
     }
 
     default: {

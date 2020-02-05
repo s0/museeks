@@ -142,6 +142,11 @@ export interface Config {
   minimizeToTray: boolean;
   displayNotifications: boolean;
   bounds: ConfigBounds;
+  synesthesiaEnabled: boolean;
+  /**
+   * If null, use the default port
+   */
+  synesthesiaPort: number | null;
 }
 
 /**

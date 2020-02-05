@@ -64,7 +64,9 @@ class ConfigModule extends Module {
         height: 600,
         x: Math.round(this.workArea.width / 2),
         y: Math.round(this.workArea.height / 2)
-      }
+      },
+      synesthesiaEnabled: false,
+      synesthesiaPort: null
     };
 
     return config;

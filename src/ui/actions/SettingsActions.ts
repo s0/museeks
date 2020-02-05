@@ -154,3 +154,21 @@ export const toggleDisplayNotifications = (value: boolean) => {
     type: types.REFRESH_CONFIG
   });
 };
+
+export const toggleSynesthesiaEnabled = (value: boolean) => {
+  app.config.set('synesthesiaEnabled', value);
+  app.config.save();
+
+  store.dispatch({
+    type: types.REFRESH_CONFIG
+  });
+};
+
+export const setSynesthesiaPort = (value: number | null) => {
+  app.config.set('synesthesiaPort', value);
+  app.config.save();
+
+  store.dispatch({
+    type: types.REFRESH_CONFIG
+  });
+};

@@ -12,6 +12,7 @@ import SettingsLibrary from './SettingsLibrary';
 import SettingsUI from './SettingsUI';
 import SettingsAudio from './SettingsAudio';
 import SettingsAbout from './SettingsAbout';
+import SettingsSynesthesia from './SettingsSynesthesia';
 
 import * as styles from './Settings.css';
 
@@ -30,6 +31,7 @@ const Settings: React.FC<Props> = (props) => {
           <Nav.Link to='/settings/library'>Library</Nav.Link>
           <Nav.Link to='/settings/audio'>Audio</Nav.Link>
           <Nav.Link to='/settings/interface'>Interface</Nav.Link>
+          <Nav.Link to='/settings/synesthesia'>Synesthesia</Nav.Link>
           <Nav.Link to='/settings/about'>About</Nav.Link>
         </Nav.Wrap>
       </div>
@@ -40,6 +42,7 @@ const Settings: React.FC<Props> = (props) => {
           <Route path='/settings/library' render={(p) => <SettingsLibrary {...p} library={library} />} />
           <Route path='/settings/interface' render={(p) => <SettingsUI {...p} config={conf} />} />
           <Route path='/settings/audio' render={(p) => <SettingsAudio {...p} config={conf} />} />
+          <Route path='/settings/synesthesia' render={(p) => <SettingsSynesthesia {...p} config={conf} />} />
           <Route path='/settings/about' render={() => <SettingsAbout />} />
         </Switch>
       </div>

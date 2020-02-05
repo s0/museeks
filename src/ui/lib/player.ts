@@ -25,7 +25,10 @@ class Player {
   private audioMeta: SynesthesiaMeta | null = null;
   private durationThresholdReached: boolean;
   public threshold: number;
-  private synesthesiaEndpoint: Promise<ControllerEndpoint> | null = null;
+  private synesthesiaEndpoint: Promise<{
+    endpoint: ControllerEndpoint;
+    ws: WebSocket;
+  }> | null = null;
 
   constructor(options?: PlayerOptions) {
     const mergedOptions = {
@@ -58,10 +61,19 @@ class Player {
 
   private getSynesthesiaEndpoint() {
     if (!this.synesthesiaEndpoint) {
+      let synesthesiaEnabled = app.config.get('synesthesiaEnabled');
+      if (typeof synesthesiaEnabled !== 'boolean')
+        synesthesiaEnabled = false;
+      if (!synesthesiaEnabled) {
+        return false;
+      }
+      let synesthesiaPort = app.config.get('synesthesiaPort');
+      if (typeof synesthesiaPort !== 'number')
+        synesthesiaPort = DEFAULT_SYNESTHESIA_PORT;
       const endpointPromise =
         this.synesthesiaEndpoint =
         new Promise((resolve, reject) => {
-          const ws = new WebSocket(`ws://localhost:${DEFAULT_SYNESTHESIA_PORT}/control`);
+          const ws = new WebSocket(`ws://localhost:${synesthesiaPort}/control`);
           const endpoint = new ControllerEndpoint(msg => ws.send(JSON.stringify(msg)));
           ws.addEventListener('open', () => {
             endpoint.setRequestHandler(async req => {
@@ -81,7 +93,7 @@ class Player {
                   return { success: true };
               }
             });
-            resolve(endpoint);
+            resolve({endpoint, ws});
           });
           ws.addEventListener('error', err => {
             if (endpointPromise === this.synesthesiaEndpoint)
@@ -108,6 +120,18 @@ class Player {
     return this.synesthesiaEndpoint;
   }
 
+  /**
+   * Called when e.g. the synesthesia config has changed and 
+   */
+  public resetSynesthesia() {
+    if (this.synesthesiaEndpoint) {
+      this.synesthesiaEndpoint.then(endpoint => endpoint.ws.close());
+    }
+    this.synesthesiaEndpoint = null;
+    // Re-initialize synesthesia and send state
+    this.updateState();
+  }
+
   private updateState() {
     // Push to redux
     const payload: PlayerStatusUpdatedPayload = {
@@ -118,29 +142,32 @@ class Player {
       payload
     })
     // If we are using synesthesia, send updated state
-    this.getSynesthesiaEndpoint().then(endpoint => {
-      if (!this.audioMeta || !this.audio) return;
-      endpoint.sendState({
-        layers: [{
-          file: {
-            type: 'meta' as 'meta',
-            title: this.audioMeta.title,
-            artist: this.audioMeta.artist,
-            album: this.audioMeta.album,
-            lengthMillis: this.audio.duration * 1000
-          },
-          state: this.audio.paused ? {
-            type: 'paused',
-            positionMillis:
-              this.audio.currentTime * 1000
-          } : {
-              type: 'playing',
-              effectiveStartTimeMillis: new Date().getTime() - this.audio.currentTime * 1000 / this.audio.playbackRate,
-              playSpeed: this.audio.playbackRate
-            }
-        }]
+    const endpoint = this.getSynesthesiaEndpoint();
+    if (endpoint) {
+      endpoint.then(endpoint => {
+        if (!this.audioMeta || !this.audio) return;
+        endpoint.endpoint.sendState({
+          layers: [{
+            file: {
+              type: 'meta' as 'meta',
+              title: this.audioMeta.title,
+              artist: this.audioMeta.artist,
+              album: this.audioMeta.album,
+              lengthMillis: this.audio.duration * 1000
+            },
+            state: this.audio.paused ? {
+              type: 'paused',
+              positionMillis:
+                this.audio.currentTime * 1000
+            } : {
+                type: 'playing',
+                effectiveStartTimeMillis: new Date().getTime() - this.audio.currentTime * 1000 / this.audio.playbackRate,
+                playSpeed: this.audio.playbackRate
+              }
+          }]
+        });
       });
-    });
+    }
   }
 
   async play() {

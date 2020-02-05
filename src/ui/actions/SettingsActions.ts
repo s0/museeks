@@ -5,6 +5,7 @@ import { Theme } from '../../shared/types/interfaces';
 import store from '../store';
 import types from '../constants/action-types';
 import * as app from '../lib/app';
+import Player from '../lib/player';
 import * as ToastsActions from './ToastsActions';
 
 const { ipcRenderer } = electron;
@@ -162,6 +163,8 @@ export const toggleSynesthesiaEnabled = (value: boolean) => {
   store.dispatch({
     type: types.REFRESH_CONFIG
   });
+
+  Player.resetSynesthesia();
 };
 
 export const setSynesthesiaPort = (value: number | null) => {
@@ -171,4 +174,6 @@ export const setSynesthesiaPort = (value: number | null) => {
   store.dispatch({
     type: types.REFRESH_CONFIG
   });
+
+  Player.resetSynesthesia();
 };

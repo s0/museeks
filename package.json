@@ -31,7 +31,7 @@
     "package:m": "electron-builder -m"
   },
   "dependencies": {
-    "@synesthesia-project/core": "0.0.3",
+    "@synesthesia-project/core": "0.0.4",
     "bluebird": "3.7.1",
     "chardet": "0.8.0",
     "classnames": "2.2.6",

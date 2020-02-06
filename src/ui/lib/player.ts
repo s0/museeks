@@ -69,6 +69,8 @@ class Player {
     this.audio.addEventListener('playing', this.updateState);
     this.audio.addEventListener('pause', this.updateState);
     this.audio.addEventListener('seeked', this.updateState);
+
+    setInterval(this.updateState, 1000);
   }
 
   private getSynesthesiaEndpoint() {
@@ -185,7 +187,7 @@ class Player {
                 this.audio.currentTime * 1000
             } : {
                 type: 'playing',
-                effectiveStartTimeMillis: new Date().getTime() - this.audio.currentTime * 1000 / this.audio.playbackRate,
+                effectiveStartTimeMillis: performance.now() - this.audio.currentTime * 1000 / this.audio.playbackRate,
                 playSpeed: this.audio.playbackRate
               }
           }]

@@ -1,5 +1,6 @@
 import { ControllerEndpoint } from '@synesthesia-project/core/lib/protocols/control';
 import { DEFAULT_SYNESTHESIA_PORT } from '@synesthesia-project/core/lib/constants';
+import PreciseAudio from '@synesthesia-project/precise-audio';
 
 import * as app from './app';
 import store from '../store';
@@ -33,7 +34,7 @@ function updateSynesthesiaStatus(payload: SynesthesiaStatus) {
 }
 
 class Player {
-  private audio: HTMLAudioElement;
+  private audio: PreciseAudio;
   private audioMeta: SynesthesiaMeta | null = null;
   private durationThresholdReached: boolean;
   public threshold: number;
@@ -51,11 +52,9 @@ class Player {
       ...options
     };
 
-    this.audio = new Audio();
+    this.audio = new PreciseAudio();
 
-    this.audio.defaultPlaybackRate = mergedOptions.playbackRate;
-    // eslint-disable-next-line
-    // @ts-ignore
+    this.audio.playbackRate = mergedOptions.playbackRate;
     this.audio.setSinkId(mergedOptions.audioOutputDevice);
     this.audio.playbackRate = mergedOptions.playbackRate;
     this.audio.volume = mergedOptions.volume;
@@ -66,7 +65,7 @@ class Player {
 
     // Initialize Synesthesia
     this.updateState = this.updateState.bind(this);
-    this.audio.addEventListener('playing', this.updateState);
+    this.audio.addEventListener('play', this.updateState);
     this.audio.addEventListener('pause', this.updateState);
     this.audio.addEventListener('seeked', this.updateState);
 
@@ -238,12 +237,9 @@ class Player {
 
   setAudioPlaybackRate(playbackRate: number) {
     this.audio.playbackRate = playbackRate;
-    this.audio.defaultPlaybackRate = playbackRate;
   }
 
   async setOutputDevice(deviceId: string) {
-    // eslint-disable-next-line
-    // @ts-ignore
     await this.audio.setSinkId(deviceId);
   }
 

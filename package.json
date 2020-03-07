@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@synesthesia-project/core": "0.0.5",
+    "@synesthesia-project/precise-audio": "^0.1.2",
     "bluebird": "3.7.1",
     "chardet": "0.8.0",
     "classnames": "2.2.6",
